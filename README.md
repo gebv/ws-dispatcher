@@ -2,7 +2,7 @@
 websocket connections manager
 
 example
-``` golang
+``` go
 
 var wsDispatcher *Dispatcher
 wsDispatcher = NewDispatcher()
