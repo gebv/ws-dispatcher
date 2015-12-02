@@ -1,4 +1,4 @@
-package wsd
+package wsd_example
 
 import (
 	"github.com/golang/glog"
