@@ -1,12 +1,12 @@
 package wsd
 
-// import (
+import (
 // 	"github.com/golang/glog"
 // 	"github.com/gorilla/websocket"
 // 	"net/http"
 // 	"strconv"
-// 	"time"
-// )
+	"time"
+)
 
 const (
 	// Time allowed to write a message to the peer.
