@@ -5,7 +5,7 @@ import (
 	"sync"
 )
 
-func NewDispatcher() *Dispatcher {
+func NewDispatcher(threadAccessChecker func(*UserInfo, string) bool) *Dispatcher {
 	model := new(Dispatcher)
 	model.fromConnections = make(chan *MessageInformer)
 	model.toThread = make(chan *MessageDTO)
@@ -15,6 +15,7 @@ func NewDispatcher() *Dispatcher {
 	// model.connectionUsers = make(map[string][]*UserConnection)
 	model.connectionThreads = make(map[*UserConnection]*ConnectionThreadsManager)
 	model.ConnDisconected = make(chan *UserConnection)
+	model.FnThreadAccessChecker = threadAccessChecker
 
 	return model
 }
@@ -42,6 +43,8 @@ type Dispatcher struct {
 
 	// Signal disconected
 	ConnDisconected chan *UserConnection
+
+	FnThreadAccessChecker func(*UserInfo, string) bool
 }
 
 // The messages sent to connection
@@ -160,7 +163,7 @@ func (c *Dispatcher) Listener() {
 
 					if !exist {
 						glog.Infof("MTUpdateSubscrib. Пользователь '%d' не является участником хотя бы в одном канале", message.Meta.Conn.userInfo.UserId)
-						c.connectionThreads[message.Meta.Conn] = NewThreadManager(message.Meta.Conn)
+						c.connectionThreads[message.Meta.Conn] = NewThreadManager(message.Meta.Conn, c.FnThreadAccessChecker)
 						threadManager = c.connectionThreads[message.Meta.Conn]
 					}
 

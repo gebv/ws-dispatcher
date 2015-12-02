@@ -6,18 +6,20 @@ import (
 	"sync"
 )
 
-func NewThreadManager(conn *UserConnection) *ConnectionThreadsManager {
+func NewThreadManager(conn *UserConnection, accessCkecker func(*UserInfo, string) bool) *ConnectionThreadsManager {
 	model := new(ConnectionThreadsManager)
 	model.Conn = conn
 	model.Threads = make(map[string]*ThreadSpace)
+	model.AccessChecker = accessCkecker
 
 	return model
 }
 
 type ConnectionThreadsManager struct {
 	sync.Mutex
-	Conn    *UserConnection
-	Threads map[string]*ThreadSpace
+	Conn          *UserConnection
+	Threads       map[string]*ThreadSpace
+	AccessChecker func(*UserInfo, string) bool
 }
 
 func (c *ConnectionThreadsManager) Disconnected() {
@@ -30,6 +32,11 @@ func (c *ConnectionThreadsManager) Disconnected() {
 
 func (c *ConnectionThreadsManager) AddThread(thread *ThreadSpace) {
 	if _, exist := c.Threads[thread.Id]; !exist {
+
+		if !c.AccessChecker(c.Conn.userInfo, thread.Id) {
+			glog.Warningf("Нет доступа '%+v' к thread id '%s'", c.Conn.userInfo, thread.Id)
+			return
+		}
 
 		thread.AddParticipant() <- c.Conn
 
