@@ -47,6 +47,14 @@ type Dispatcher struct {
 	FnThreadAccessChecker func(*UserInfo, string) bool
 }
 
+func (c *Dispatcher) ToConnection() chan<- *MessageDTO {
+	return (chan<- *MessageDTO)(c.toConnection)
+}
+
+func (c *Dispatcher) ToThread() chan<- *MessageDTO {
+	return (chan<- *MessageDTO)(c.toThread)
+}
+
 // The messages sent to connection
 func (c *Dispatcher) listenerMessagesToConnection() {
 	for {
